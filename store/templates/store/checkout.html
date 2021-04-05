@@ -39,6 +39,7 @@
             <br>
             <div class="box-element hidden" id="payment-info">
                 <small>Paypal Option</small>
+                <button id="make-payment">Make Payment</button>
             </div>
         </div>
         <div class="col-lg-6">
@@ -62,10 +63,40 @@
         </div>
     </div>
     <script type='text/javascript'>
+    //function for the hidding shipping address if item is digital
         var shipping = '{{order.shipping}}'
         if(shipping=='False')
         {
             document.getElementById('shipping-info').innerHTML = ''
         }
+        //condition for user if login then hide email and password field
+        if(user!='AnonymousUser')
+        {
+            document.getElementById('user-info').innerHTML=''
+        }
+        
+        if(shipping=='False' && user!='AnonymousUser')
+        {
+            document.getElementById('form-wrapper').classList.add('hidden')
+            document.getElementById('payment-info').classList.remove('hidden')
+        }
+
+
+        //function for showing the payment button and hide the continue button from shipping address form
+        var form = document.getElementById('form')
+        form.addEventListener('submit',function(e){
+            e.preventDefault()
+            console.log('form Submitted')
+            document.getElementById('form-button').classList.add('hidden')
+            document.getElementById('payment-info').classList.remove('hidden')
+        })
+
+        document.getElementById('make-payment').addEventListener('click',function(e){
+            submitFormData()
+        })
+        function submitFormData(){
+            console.log('payment button clicked')
+        }
     </script>
+
 {%endblock content%}
