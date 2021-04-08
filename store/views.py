@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from django.http import JsonResponse
 from . models import *
+import datetime
 import json
 # Create your views here.
 
@@ -71,3 +72,29 @@ def updateItem(request):
 		orderItem.delete()
 
 	return JsonResponse('Item was added', safe=False)
+
+
+def processOrder(request):
+    transition_id=datetime.datetime.now().timestamp()
+    data=json.loads(request.body)
+    if request.user.is_authenticated:
+        customer=request.user.customer
+        order,created = Order.objects.get_or_create(customer=customer,complete=False)
+        total = float(data['form']['total'])
+        order.transition_id=transition_id
+        #if the total is equal to the cart total then complete use this condition here to secure data from user who know js
+        if total==order.get_cart_total:
+            order.complete=True
+        order.save()
+    if order.shipping==True:
+        ShippingAddress.objects.create(
+            customer=customer,
+            order=order,
+            address=data['shipping']['address'],
+            city=data['shipping']['city'],
+            state=data['shipping']['state'],
+            zipcode=data['shipping']['zipcode'],
+        )
+    else:
+        print('user is not login')
+    return JsonResponse('Payment Complete',safe=False)
